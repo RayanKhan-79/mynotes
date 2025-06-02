@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
-import 'package:mynotes/service/crud/databse_note.dart';
-import 'package:mynotes/service/crud/notes_service.dart';
+import 'package:mynotes/service/cloud/cloud_note.dart';
+import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/methods.dart';
 import 'dart:developer' as dev show log;
 
@@ -16,7 +16,7 @@ class AddNoteView extends StatefulWidget
 class _AddNoteViewState extends State<AddNoteView> 
 {
 
-  DatabaseNote? _activeNote;
+  CloudNote? _activeNote;
   late final TextEditingController _textController;
 
   @override
@@ -26,8 +26,8 @@ class _AddNoteViewState extends State<AddNoteView>
     _textController = TextEditingController();
     _textController.addListener(() async
     {      
-      await NotesService.instance.updateNote(noteId: _activeNote!.id, text: _textController.text);
-      _activeNote = await NotesService.instance.fetchNoteById(noteId: _activeNote!.id);
+      await FirebaseCloudStorage.instance.updateNote(noteId: _activeNote!.id, text: _textController.text);
+      _activeNote = await FirebaseCloudStorage.instance.readNote(noteId: _activeNote!.id);
       test();
     });
   }
@@ -42,21 +42,21 @@ class _AddNoteViewState extends State<AddNoteView>
 
   void test() async
   {
-    var note = await NotesService.instance.fetchNoteById(noteId: 5);
-    dev.log(note.toString());
+    // var note = await NotesService.instance.fetchNoteById(noteId: 5);
+    // dev.log(note.toString());
   }
 
   void _autoDeleteNote() async
   {
     if (_activeNote != null && _activeNote!.text.isEmpty)
     {
-      await NotesService.instance.deleteNote(noteId: _activeNote!.id);
+      await FirebaseCloudStorage.instance.deleteNote(noteId: _activeNote!.id);
     }
   }
 
   Future<void> createNote() async
   {
-    _activeNote = getBuildContextArgument<DatabaseNote>(context);
+    _activeNote = getBuildContextArgument<CloudNote>(context);
 
     if (_activeNote != null) 
     {
@@ -65,10 +65,8 @@ class _AddNoteViewState extends State<AddNoteView>
     }
 
     try
-    {
-      await NotesService.instance.open();
-      var owner = await NotesService.instance.fetchUserByEmail(email: AuthService.firebase().getUser()!.email);
-      _activeNote  = await NotesService.instance.createNote(owner: owner);    
+    {      
+      _activeNote  = await FirebaseCloudStorage.instance.createNote(userId: AuthService.firebase().getUser()!.userId);    
     }
     catch (e)
     {

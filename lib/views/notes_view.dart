@@ -2,8 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
-import 'package:mynotes/service/crud/database_user.dart';
-import 'package:mynotes/service/crud/notes_service.dart';
+import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/methods.dart';
 import 'package:mynotes/views/notes_list_view.dart';
 
@@ -65,64 +64,53 @@ class _NotesViewState extends State<NotesView> {
           )
         ],
       ),
-      body: Center(child: FutureBuilder
-      (
-        future: fetchUserAndUpdateCache(AuthService.firebase().getUser()!.email),
-        builder: (context, userSnapshot) 
-        {
-          switch (userSnapshot.connectionState) 
+      body: Center(
+        child: StreamBuilder
+        (
+          stream: FirebaseCloudStorage.instance.streamNotes(userId: AuthService.firebase().getUser()!.userId),
+          builder: (context, snapshot) 
           {
-            case ConnectionState.done:
-              return StreamBuilder
-              (
-                stream: NotesService.instance.controller.stream,
-                builder: (context, snapshot) 
-                {
-                  switch (snapshot.connectionState)
-                  {
-                    case ConnectionState.active:
-                    case ConnectionState.waiting:
-                      // return Text('Notes');
-                      if (snapshot.hasData)
-                        return NotesListView
-                        (
-                          notes: snapshot.data!, 
-                          deleteCallback: (note) async
-                          {
-                            await NotesService.instance.deleteNote(noteId: note.id);
-                          },
-                          openNoteCallback: (note)
-                          {
-                            Navigator.pushNamed(context, '/add_note/', arguments: note);
-                          },
-                        );
-                      else
-                        return Text("Couldn't Fetch Your Notes");
+            switch (snapshot.connectionState)
+            {
+              case ConnectionState.active:
+              case ConnectionState.waiting:
+                // return Text('Notes');
+                if (snapshot.hasData)
+                  return NotesListView
+                  (
+                    notes: snapshot.data!, 
+                    deleteCallback: (note) async
+                    {
+                      await FirebaseCloudStorage.instance.deleteNote(noteId: note.id);
+                    },
+                    openNoteCallback: (note)
+                    {
+                      Navigator.pushNamed(context, '/add_note/', arguments: note);
+                    },
+                  );
+                else
+                  return Text("Couldn't Fetch Your Notes");
 
-                    default:
-                      return Column
-                      (
-                        children: 
-                        [
-                          Text('Fetching Your Notes'),
-                          CircularProgressIndicator()
-                        ],
-                      );
-                  }
-                }
-              );
-            default:
-              return CircularProgressIndicator();
+              default:
+                return Column
+                (
+                  children: 
+                  [
+                    Text('Fetching Your Notes'),
+                    CircularProgressIndicator()
+                  ],
+                );
+            }
           }
-        }
-      ),),
+        ) 
+      ),
     );
   }
 }
 
-Future<DatabaseUser> fetchUserAndUpdateCache(String email) async
-{
-  var user = await NotesService.instance.fetchUserByEmail(email: email);
-  await NotesService.instance.updateCache(user: user);
-  return user;
-}
+// Future<DatabaseUser> fetchUserAndUpdateCache(String email) async
+// {
+//   var user = await NotesService.instance.fetchUserByEmail(email: email);
+//   await NotesService.instance.updateCache(user: user);
+//   return user;
+// }

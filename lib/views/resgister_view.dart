@@ -83,11 +83,7 @@ class _RegisterViewState extends State<RegisterView>
 
                 if (AuthService.firebase().getUser()!.isEmailVerified())
                 {
-                  await NotesService.instance.open();
-                  var v = await NotesService.instance.createUser(email: AuthService.firebase().getUser()!.email);
                   dev.log('User-Added-In-DB');
-                  dev.log(v.toString());
-
                   Navigator.of(context).pushNamedAndRemoveUntil('/notes_view/', (route) => false);
                 }
               } 

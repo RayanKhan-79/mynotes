@@ -1,9 +1,7 @@
 
 // ignore_for_file: avoid_print
 
-import 'dart:developer' as dev show log;
 import 'package:flutter/material.dart';
-import 'package:mynotes/service/crud/notes_service.dart';
 
 class DatabaseView extends StatelessWidget 
 {
@@ -31,10 +29,10 @@ class DatabaseView extends StatelessWidget
           TextButton(
             onPressed: () async 
             {
-              var result = await NotesService.instance.db!.rawQuery(_controller.text);
-              dev.log('--------------');
-              for (var line in result)
-                dev.log(line.toString());
+              // var result = await NotesService.instance.db!.rawQuery(_controller.text);
+              // dev.log('--------------');
+              // for (var line in result)
+              //   dev.log(line.toString());
             },
             child: Text('Run')
           ),

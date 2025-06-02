@@ -107,7 +107,7 @@ class MockAuthProvider implements AuthProvider
     if (password == 'reject') throw LoginException();
 
     await Future.delayed(Duration(seconds: 1));
-    user = AuthUser(email: email, verified: false);
+    user = AuthUser(userId: 'idiot', email: email, verified: false);
     return user!;
   }
 
@@ -124,7 +124,7 @@ class MockAuthProvider implements AuthProvider
   {
     if (initialized == false) throw NotInitializedException();
     if (user == null) throw UnknownException();
-    user = AuthUser(email: user!.email, verified: true);
+    user = AuthUser(userId: 'idiot', email: user!.email, verified: true);
   }
 
   @override
