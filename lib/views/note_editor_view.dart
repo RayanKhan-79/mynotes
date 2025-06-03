@@ -5,15 +5,17 @@ import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/methods.dart';
 import 'dart:developer' as dev show log;
 
-class AddNoteView extends StatefulWidget 
+import 'package:share_plus/share_plus.dart';
+
+class NoteEditorView extends StatefulWidget 
 {
-  const AddNoteView({super.key});
+  const NoteEditorView({super.key});
 
   @override
-  State<AddNoteView> createState() => _AddNoteViewState();
+  State<NoteEditorView> createState() => _NoteEditorViewState();
 }
 
-class _AddNoteViewState extends State<AddNoteView> 
+class _NoteEditorViewState extends State<NoteEditorView> 
 {
 
   CloudNote? _activeNote;
@@ -28,7 +30,6 @@ class _AddNoteViewState extends State<AddNoteView>
     {      
       await FirebaseCloudStorage.instance.updateNote(noteId: _activeNote!.id, text: _textController.text);
       _activeNote = await FirebaseCloudStorage.instance.readNote(noteId: _activeNote!.id);
-      test();
     });
   }
 
@@ -38,12 +39,6 @@ class _AddNoteViewState extends State<AddNoteView>
     _textController.dispose();
     _autoDeleteNote();
     super.dispose();
-  }
-
-  void test() async
-  {
-    // var note = await NotesService.instance.fetchNoteById(noteId: 5);
-    // dev.log(note.toString());
   }
 
   void _autoDeleteNote() async
@@ -93,6 +88,26 @@ class _AddNoteViewState extends State<AddNoteView>
               (
                 title: const Text("Notes View", style: TextStyle(color: Colors.white),),
                 backgroundColor: Colors.blue,
+                actions: 
+                [
+                  IconButton
+                  (
+                    onPressed: () async 
+                    {
+                      if (_activeNote != null)
+                        if (_activeNote!.text.isNotEmpty)
+                        {
+                          var param = ShareParams(text: _activeNote!.text);
+                          SharePlus.instance.share(param);
+                          return;
+                        }
+
+                      await showErrorDialog(context, 'Cannot Share Empty Note');
+
+                    },
+                    icon: Icon(Icons.share)
+                  )
+                ],
               ),
               body: TextField(
                 maxLines: null, 
