@@ -1,8 +1,11 @@
 // ignore_for_file: unused_import
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/service/auth/auth_exceptions.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:mynotes/service/auth/auth_user.dart';
+import 'package:mynotes/service/bloc/auth_bloc.dart';
+import 'package:mynotes/service/bloc/auth_event.dart';
 import 'package:mynotes/utilities/methods.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as dev show log;
@@ -72,18 +75,10 @@ class _LoginViewState extends State<LoginView>
                 (
                   onPressed: () async
                   {
-                    late final AuthUser credentials;
                     try 
                     {
-                      credentials = await AuthService.firebase().login(email: emailController.text,password: passwordController.text);
-
-                      showInfoDialog(context, 'Login Successfull\n$credentials');
-
-                      if (credentials.isEmailVerified() == false)
-                        await verifyEmail(emailController.text, passwordController.text, context);
-                      else
-                        Navigator.of(context).pushNamedAndRemoveUntil('/notes_view/', (route)=>false);
-                      
+                      final event = LoginEvent(email: emailController.text, password: passwordController.text);
+                      context.read<AuthBloc>().add(event);
                     } 
                     on LoginException
                     {
@@ -95,7 +90,7 @@ class _LoginViewState extends State<LoginView>
                     }
                     catch (e)
                     {
-                      showErrorDialog(context, 'Unhandled Exception');
+                      showErrorDialog(context, e.toString());
                     }
                   }, 
                   child: const Text("Login")

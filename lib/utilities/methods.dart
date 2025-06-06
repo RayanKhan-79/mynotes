@@ -59,6 +59,7 @@ Future<T?> showGenericDialogBox<T>({required BuildContext context,required Strin
     context: context,
     builder: (context) => AlertDialog
     (
+      scrollable: true,
       title: Text(title),
       content: Text(content),
       actions: valueMap.keys.map((key) 

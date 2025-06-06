@@ -1,7 +1,10 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
+import 'package:mynotes/service/bloc/auth_bloc.dart';
+import 'package:mynotes/service/bloc/auth_event.dart';
 import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/methods.dart';
 import 'package:mynotes/views/notes_list_view.dart';
@@ -43,9 +46,10 @@ class _NotesViewState extends State<NotesView> {
                 case 1:
                   if ((await showLogoutDialog(context)) == true)
                   {
-                    await FirebaseAuth.instance.signOut();
-                    if (context.mounted) 
-                      Navigator.pushNamedAndRemoveUntil(context, '/login/', (route)=>false);
+                    context.read<AuthBloc>().add(LogoutEvent());
+                    // await FirebaseAuth.instance.signOut();
+                    // if (context.mounted) 
+                    //   Navigator.pushNamedAndRemoveUntil(context, '/login/', (route)=>false);
                   }
                   return;
                 case 2:
@@ -107,10 +111,3 @@ class _NotesViewState extends State<NotesView> {
     );
   }
 }
-
-// Future<DatabaseUser> fetchUserAndUpdateCache(String email) async
-// {
-//   var user = await NotesService.instance.fetchUserByEmail(email: email);
-//   await NotesService.instance.updateCache(user: user);
-//   return user;
-// }

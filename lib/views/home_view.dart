@@ -1,39 +1,46 @@
 // ignore_for_file: unused_import
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:mynotes/service/bloc/auth_bloc.dart';
+import 'package:mynotes/service/bloc/auth_event.dart';
+import 'package:mynotes/service/bloc/auth_state.dart';
+import 'package:mynotes/utilities/methods.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes_view.dart';
 import 'package:mynotes/views/resgister_view.dart';
 import 'dart:developer' as dev show log;
 
+import 'package:mynotes/views/verification_view.dart';
+
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder
-    (
-      future: Future.delayed(Duration(seconds: 1), (){}),
-      builder: (context, snapshot) 
+  Widget build(BuildContext context) 
+  {
+    context.read<AuthBloc>().add(InitializeEvent());
+    
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) 
       {
-        final user = AuthService.firebase().getUser();
-        dev.log(user?.toString() ?? '');
-        switch (snapshot.connectionState)
-        {
-          case ConnectionState.done:
-            if (user == null || user.isEmailVerified() == false)
-            {
-              return LoginView();
-            }
-            else
-            {
-              return NotesView();
-            }
+        if (state is LoggedInState)
+          return NotesView();
+        
+        if (state is LoggedOutState)
+          return LoginView();
 
-          default:
-            return Scaffold(body: Center(child: CircularProgressIndicator(value: null,)));
-        }
-      }
+        if (state is UnVerifiedState)
+          return VerificationView();
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Not Implemented', style: TextStyle(color: Colors.white)),
+            backgroundColor: Colors.blue
+          ),
+          body: Center(child: CircularProgressIndicator()),
+        );
+      },
     );
   }
 }

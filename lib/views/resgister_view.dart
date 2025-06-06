@@ -1,11 +1,16 @@
 // ignore_for_file: unused_import
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/service/auth/auth_exceptions.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
+import 'package:mynotes/service/bloc/auth_bloc.dart';
+import 'package:mynotes/service/bloc/auth_event.dart';
 import 'package:mynotes/service/crud/notes_service.dart';
 import 'package:mynotes/utilities/methods.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as dev show log;
+
+import 'package:mynotes/views/verification_view.dart';
 
 
 class RegisterView extends StatefulWidget
@@ -74,18 +79,8 @@ class _RegisterViewState extends State<RegisterView>
             {
               try
               {
-                await AuthService.firebase().signup(email: emailController.text, password: passwordController.text);
-                dev.log(AuthService.firebase().getUser().toString());
-
-                await verifyEmail(emailController.text, passwordController.text, context);
-
-                dev.log(AuthService.firebase().getUser().toString());
-
-                if (AuthService.firebase().getUser()!.isEmailVerified())
-                {
-                  dev.log('User-Added-In-DB');
-                  Navigator.of(context).pushNamedAndRemoveUntil('/notes_view/', (route) => false);
-                }
+                final event = RegisterEvent(email: emailController.text, password: passwordController.text);
+                context.read<AuthBloc>().add(event);
               } 
               on WeakPasswordException
               {
@@ -99,7 +94,6 @@ class _RegisterViewState extends State<RegisterView>
               {
                 showErrorDialog(context, 'Unknown Exception');
               }
-
 
             }, 
             child: Text("Register")
