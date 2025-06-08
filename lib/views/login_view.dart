@@ -6,7 +6,8 @@ import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:mynotes/service/auth/auth_user.dart';
 import 'package:mynotes/service/bloc/auth_bloc.dart';
 import 'package:mynotes/service/bloc/auth_event.dart';
-import 'package:mynotes/utilities/methods.dart';
+import 'package:mynotes/service/bloc/auth_state.dart';
+import 'package:mynotes/utilities/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as dev show log;
 
@@ -44,71 +45,66 @@ class _LoginViewState extends State<LoginView>
     @override
     Widget build(BuildContext context)
     {
-        return Scaffold
+        return BlocListener<AuthBloc, AuthState>
         (
-            appBar: AppBar
-            (
-              title: Text(widget.title, style: TextStyle(color: Colors.white)),
-              backgroundColor: Colors.blue,
-            ),
-            body: Column
-            (
-              children: 
-              [
-                TextField
-                (
-                  controller: emailController,
-                  autocorrect: false, 
-                  enableSuggestions: false,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(hintText: "Email"),
-                ),
-                TextField
-                (
-                  controller: passwordController,
-                  obscureText: true,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: InputDecoration(hintText: "Password")
-                ),
-                TextButton
-                (
-                  onPressed: () async
-                  {
-                    try 
+          listener: (context, state) async
+          {
+            if (state is LoggedOutState)
+              if (state.exception != null) 
+              {
+                if (state.exception is LoginException)
+                  await showErrorDialog(context, 'Invalid-Credentials');
+                if (state.exception is UnknownException)
+                  await showErrorDialog(context, state.exception.toString());
+              }
+          },
+          child: Scaffold
+          (
+              appBar: AppBar
+              (
+                title: Text(widget.title, style: TextStyle(color: Colors.white)),
+                backgroundColor: Colors.blue,
+              ),
+              body: Column
+              (
+                children: 
+                [
+                  TextField
+                  (
+                    controller: emailController,
+                    autocorrect: false, 
+                    enableSuggestions: false,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(hintText: "Email"),
+                  ),
+                  TextField
+                  (
+                    controller: passwordController,
+                    obscureText: true,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: InputDecoration(hintText: "Password")
+                  ),
+                  TextButton
+                  (
+                    onPressed: () async
                     {
                       final event = LoginEvent(email: emailController.text, password: passwordController.text);
                       context.read<AuthBloc>().add(event);
-                    } 
-                    on LoginException
+                    },
+                    child: const Text("Login")
+                  ),
+                  TextButton
+                  (
+                    onPressed: ()
                     {
-                      showErrorDialog(context, 'Couldn\'t login Please Ensure Your Credentials Are Correct');
-                    }
-                    on UnknownException
-                    {
-                      showErrorDialog(context, 'Unknown Exception');
-                    }
-                    catch (e)
-                    {
-                      showErrorDialog(context, e.toString());
-                    }
-                  }, 
-                  child: const Text("Login")
-                ),
-                TextButton
-                (
-                  onPressed: ()
-                  {
-                    Navigator.of(context).pushNamedAndRemoveUntil
-                    (
-                      '/register/', 
-                      (route) => false,
-                    );
-                  }, 
-                  child: const Text('Register Here')
-                )
-              ],
-            )
+                      context.read<AuthBloc>().add(ShouldRegisterEvent());
+                    }, 
+                    child: const Text('Register Here')
+                  )
+                ],
+              )
+          )
         );
     }
 }

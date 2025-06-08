@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:mynotes/service/auth/auth_service.dart';
-import 'package:mynotes/utilities/methods.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/service/bloc/auth_bloc.dart';
+import 'package:mynotes/service/bloc/auth_event.dart';
 
 class VerificationView extends StatelessWidget 
 {
@@ -20,27 +21,19 @@ class VerificationView extends StatelessWidget
       body: Column
       (
         mainAxisAlignment: MainAxisAlignment.center,
-        children: 
-        [
+        children: [
           Text("We've Sen't You A Verification Email, Please Open It To Verify Your Account"),
-          TextButton
-          (
+
+          TextButton(
             onPressed: () async {
-              await AuthService.firebase().sendEmailVerification();
+              context.read<AuthBloc>().add(SendEmailVerificationEvent());
             }, 
             child: Text('Resend It')
           ),
-          TextButton(
+          
+          TextButton (
             onPressed: () async {
-              if (AuthService.firebase().getUser()!.verified)
-              {
-                await showInfoDialog(context, "Thank You, We Are Now Redirecting You To The Login Page");
-                Navigator.pushNamedAndRemoveUntil(context, '/login/', (route) => false);
-              }
-              else
-              {
-                await showErrorDialog(context, "Sorry But Your Account Couldn't Be Verified");
-              }
+              context.read<AuthBloc>().add(VeriyEmailEvent());
             }, 
             child: Text("I've Clicked It")
           )

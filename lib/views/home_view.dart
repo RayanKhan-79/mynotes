@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/service/bloc/auth_bloc.dart';
 import 'package:mynotes/service/bloc/auth_event.dart';
 import 'package:mynotes/service/bloc/auth_state.dart';
-import 'package:mynotes/utilities/methods.dart';
+import 'package:mynotes/utilities/dialogs.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes_view.dart';
 import 'package:mynotes/views/resgister_view.dart';
@@ -30,16 +30,13 @@ class HomeView extends StatelessWidget {
         if (state is LoggedOutState)
           return LoginView();
 
+        if (state is RegisteringState)
+          return RegisterView();
+
         if (state is UnVerifiedState)
           return VerificationView();
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Not Implemented', style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.blue
-          ),
-          body: Center(child: CircularProgressIndicator()),
-        );
+        return CircularProgressIndicator();
       },
     );
   }

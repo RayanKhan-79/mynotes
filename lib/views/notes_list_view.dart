@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/service/cloud/cloud_note.dart';
-import 'package:mynotes/utilities/methods.dart';
+import 'package:mynotes/utilities/dialogs.dart';
 
 class NotesListView extends StatelessWidget 
 {  

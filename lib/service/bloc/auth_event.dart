@@ -22,7 +22,22 @@ class RegisterEvent implements AuthEvent
   const RegisterEvent({required this.email, required this.password});
 }
 
+class SendEmailVerificationEvent implements AuthEvent
+{
+  const SendEmailVerificationEvent();
+}
+
+class VeriyEmailEvent implements AuthEvent
+{
+  const VeriyEmailEvent();
+}
+
 class LogoutEvent implements AuthEvent
 {
   const LogoutEvent();
+}
+
+class ShouldRegisterEvent implements AuthEvent
+{
+  const ShouldRegisterEvent();
 }

@@ -5,8 +5,9 @@ import 'package:mynotes/service/auth/auth_exceptions.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:mynotes/service/bloc/auth_bloc.dart';
 import 'package:mynotes/service/bloc/auth_event.dart';
+import 'package:mynotes/service/bloc/auth_state.dart';
 import 'package:mynotes/service/crud/notes_service.dart';
-import 'package:mynotes/utilities/methods.dart';
+import 'package:mynotes/utilities/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as dev show log;
 
@@ -46,72 +47,70 @@ class _RegisterViewState extends State<RegisterView>
   @override
   Widget build(BuildContext context)
   {
-    return Scaffold
-    (
-      appBar: AppBar
-      (
-        title: Text(widget.title, style: TextStyle(color: Colors.white)), 
-        backgroundColor: Colors.blue,
-      ),
-      body: Column
-      (
-        children: 
-        [
-          TextField
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) async
+      {
+        if (state is RegisteringState)
+          if (state.exception != null)
+          {
+            if (state.exception is EmailAlreadyInUseException)
+              await showErrorDialog(context, 'Email Already In Use');
+            if (state.exception is WeakPasswordException)
+              await showErrorDialog(context, 'Weak Password, Must Be At Least 8 Characters Long');
+            if (state.exception is UnknownException)
+              await showErrorDialog(context, state.exception.toString());
+          }
+      },
+      builder: (context, state)
+      {
+        return Scaffold
+        (
+          appBar: AppBar
           (
-            controller: emailController,
-            autocorrect: false, 
-            enableSuggestions: false,
-            keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(hintText: "Email"),
+            title: Text(widget.title, style: TextStyle(color: Colors.white)), 
+            backgroundColor: Colors.blue,
           ),
-          TextField
+          body: Column
           (
-            controller: passwordController,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: InputDecoration(hintText: "Password")
-          ),
-          TextButton
-          (
-            onPressed: () async
-            {
-              try
-              {
-                final event = RegisterEvent(email: emailController.text, password: passwordController.text);
-                context.read<AuthBloc>().add(event);
-              } 
-              on WeakPasswordException
-              {
-                showErrorDialog(context, 'Your password must be at least 6 characters long');
-              }
-              on EmailAlreadyInUseException
-              {
-                showErrorDialog(context, 'Email already in use');
-              }
-              on UnknownException
-              {
-                showErrorDialog(context, 'Unknown Exception');
-              }
-
-            }, 
-            child: Text("Register")
-          ),
-          TextButton
-          (
-            onPressed: ()
-            {
-              Navigator.of(context).pushNamedAndRemoveUntil
+            children: 
+            [
+              TextField
               (
-                '/login/',
-                (route) => false,
-              );
-            }, 
-            child: const Text('Already Registered? Login Here')
+                controller: emailController,
+                autocorrect: false, 
+                enableSuggestions: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(hintText: "Email"),
+              ),
+              TextField
+              (
+                controller: passwordController,
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: InputDecoration(hintText: "Password")
+              ),
+              TextButton
+              (
+                onPressed: () async
+                {
+                  final event = RegisterEvent(email: emailController.text, password: passwordController.text);
+                  context.read<AuthBloc>().add(event);
+                },
+                child: Text("Register")
+              ),
+              TextButton
+              (
+                onPressed: ()
+                {
+                  context.read<AuthBloc>().add(LogoutEvent());
+                }, 
+                child: const Text('Already Registered? Login Here')
+              )
+            ],
           )
-        ],
-      )
+        );
+      },
     );
   }
 }

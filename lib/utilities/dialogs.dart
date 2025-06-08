@@ -1,56 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as dev show log;
-
-Future<void> verifyEmail(String email, String password, BuildContext context) async
-{
-  await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-  if (!context.mounted) return;
-
-  showDialog 
-  (
-    context: context,
-    builder:(context) 
-    {
-      return AlertDialog
-      (
-        title: Text('We\'ve Sent You a verification link via email, please open your email on click it'),
-        actions: 
-        [
-          TextButton
-          (
-            onPressed: () async 
-            {
-              dev.log('Sign in process starting');
-              await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-              dev.log(FirebaseAuth.instance.currentUser?.toString() ?? '');
-              
-              if (FirebaseAuth.instance.currentUser?.emailVerified ?? false)
-                Navigator.of(context).pushNamedAndRemoveUntil('/notes_view/', (route)=>false);
-            }, 
-            child: const Text('I\'ve Clicked it')
-          ),
-          TextButton
-          (
-            onPressed: () async 
-            {
-              await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-            }, 
-            child: const Text('Resend it')
-          ),
-          TextButton
-          (
-            onPressed: ()
-            {
-              Navigator.of(context).pop();
-            },
-            child: const Text('I\'ll do it later')
-          )
-        ]
-      );
-    },
-  );
-}
 
 Future<T?> showGenericDialogBox<T>({required BuildContext context,required String title,required String content,required Map<String,T?> valueMap})
 {
@@ -139,4 +87,22 @@ T? getBuildContextArgument<T>(BuildContext context)
     return arg as T;
 
   return null;
+}
+
+void Function() showLoadingDialog(BuildContext context)
+{
+  final dialog = AlertDialog
+  (
+    title: Text("Loading Please Wait"),
+    content: CircularProgressIndicator(),
+  );
+
+  showDialog
+  (
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => dialog
+  );
+
+  return () => Navigator.pop(context);
 }

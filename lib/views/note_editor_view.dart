@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:mynotes/service/cloud/cloud_note.dart';
 import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
-import 'package:mynotes/utilities/methods.dart';
+import 'package:mynotes/utilities/dialogs.dart';
 import 'dart:developer' as dev show log;
 
 import 'package:share_plus/share_plus.dart';

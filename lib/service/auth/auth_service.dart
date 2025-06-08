@@ -46,9 +46,15 @@ class AuthService implements AuthProvider
   }
   
   @override
-  Future<void> deleteUser() async
+  Future<void> deleteUser()
   {
     return provider.deleteUser();
+  }
+  
+  @override
+  Future<AuthUser> verifyAndLogin({required String email, required String password}) 
+  {
+    return provider.verifyAndLogin(email: email, password: password);
   }
   
 }

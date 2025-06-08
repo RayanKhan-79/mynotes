@@ -24,6 +24,17 @@ class FirebaseAuthProvider implements AuthProvider
   }
 
   @override
+  Future<AuthUser> verifyAndLogin({required String email, required String password}) async
+  {
+    await login(email: email, password: password);
+    
+    if (FirebaseAuth.instance.currentUser!.emailVerified == false)
+      throw UnVerifiedEmailException();
+  
+    return getUser()!;
+  }
+
+  @override
   Future<AuthUser> login({required String email, required String password}) async 
   {
     try 
@@ -62,13 +73,15 @@ class FirebaseAuthProvider implements AuthProvider
   {
     try
     {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      final usercred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
       currentUser = getUser();
 
       return currentUser!;
     }
     on FirebaseAuthException catch(e)
     {
+      print(e.code);
+
       if (e.code == 'weak-password')
         throw WeakPasswordException();
 
