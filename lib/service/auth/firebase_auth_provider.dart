@@ -49,10 +49,6 @@ class FirebaseAuthProvider implements AuthProvider
     {
       throw LoginException();
     }
-    catch (e)
-    {
-      throw UnknownException();
-    }
     
   }
 
@@ -73,26 +69,20 @@ class FirebaseAuthProvider implements AuthProvider
   {
     try
     {
-      final usercred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
       currentUser = getUser();
 
       return currentUser!;
     }
     on FirebaseAuthException catch(e)
     {
-      print(e.code);
-
       if (e.code == 'weak-password')
         throw WeakPasswordException();
 
       if (e.code == 'email-already-in-use')
         throw EmailAlreadyInUseException();
-
-      throw UnknownException();
-    }
-    catch (e)
-    {
-      throw UnknownException();
+    
+      rethrow;
     }
   }
   

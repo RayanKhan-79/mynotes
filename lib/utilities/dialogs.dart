@@ -95,6 +95,13 @@ void Function() showLoadingDialog(BuildContext context)
   (
     title: Text("Loading Please Wait"),
     content: CircularProgressIndicator(),
+    // actions: [
+    //   TextButton
+    //   (
+    //     onPressed: () => Navigator.pop(context), 
+    //     child: Text("Cancel")
+    //   )
+    // ],
   );
 
   showDialog

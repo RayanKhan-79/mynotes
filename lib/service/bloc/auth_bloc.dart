@@ -11,7 +11,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
 {
   final AuthService provider;
   
-  AuthBloc({required this.provider}) : super(UnInitializedState(isLoading: false))
+  AuthBloc({required this.provider}) : super(UnInitializedState(exception: null, isLoading: false))
   {
 
     on<ShouldRegisterEvent>((event, emit)
@@ -37,7 +37,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
       ));
 
       await provider.sendEmailVerification();
-      emit(state);
+      
+      emit(UnVerifiedState
+      (
+        exception: null,
+        isLoading: false,
+        email: email,
+        password: password
+      ));
+
     });
 
     on<VeriyEmailEvent>((event, emit) async
@@ -61,6 +69,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
           password: password
         );
 
+        emit(LoggedInState
+        (
+          exception: null, 
+          isLoading: false)
+        );
+
       } 
       on Exception catch (e) 
       {
@@ -76,7 +90,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
 
     on<InitializeEvent>((event, emit) async 
     {
-        emit(UnInitializedState(isLoading: true));
+        emit(UnInitializedState(exception: null, isLoading: false));
 
         await provider.initialize();
         if (provider.getUser() == null)
@@ -143,7 +157,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
     {
       try 
       {
-        emit(LoggedOutState(exception: null, isLoading: true));
+        emit(LoggedOutState
+        (
+          exception: null,
+          isLoading: true
+        ));
+
         final user = await provider.login(email: event.email, password: event.password);
         if (!user.verified)
         {
@@ -161,7 +180,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
       } 
       on Exception catch (e) 
       {
-        emit(LoggedOutState(exception: e, isLoading: false));
+        emit(LoggedOutState
+        (
+          exception: e,
+          isLoading: false
+        ));
       }
 
     });

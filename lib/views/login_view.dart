@@ -1,6 +1,8 @@
 // ignore_for_file: unused_import
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/helpers/loading/loading_dialog.dart';
 import 'package:mynotes/service/auth/auth_exceptions.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:mynotes/service/auth/auth_user.dart';
@@ -16,7 +18,7 @@ class LoginView extends StatefulWidget
 {
     final String title;
     const LoginView({super.key, this.title = "Login"});
-    
+
     @override
     State<LoginView> createState() =>_LoginViewState();
 }
@@ -25,6 +27,8 @@ class _LoginViewState extends State<LoginView>
 {
     late TextEditingController emailController;
     late TextEditingController passwordController;
+    // void Function()? _shutDownLoadingScreen;
+
 
     @override
     void initState() 
@@ -50,13 +54,15 @@ class _LoginViewState extends State<LoginView>
           listener: (context, state) async
           {
             if (state is LoggedOutState)
+            {
               if (state.exception != null) 
               {
                 if (state.exception is LoginException)
                   await showErrorDialog(context, 'Invalid-Credentials');
-                if (state.exception is UnknownException)
-                  await showErrorDialog(context, state.exception.toString());
+                if (state.exception is FirebaseAuthException)
+                  await showErrorDialog(context, 'Firebase: ${state.exception.toString()}');
               }
+            }
           },
           child: Scaffold
           (
@@ -89,8 +95,11 @@ class _LoginViewState extends State<LoginView>
                   (
                     onPressed: () async
                     {
-                      final event = LoginEvent(email: emailController.text, password: passwordController.text);
-                      context.read<AuthBloc>().add(event);
+                      context.read<AuthBloc>().add(LoginEvent
+                      (
+                        email: emailController.text,
+                        password: passwordController.text
+                      ));
                     },
                     child: const Text("Login")
                   ),

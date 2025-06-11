@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/service/auth/auth_exceptions.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
@@ -47,23 +48,23 @@ class _RegisterViewState extends State<RegisterView>
   @override
   Widget build(BuildContext context)
   {
-    return BlocConsumer<AuthBloc, AuthState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async
       {
         if (state is RegisteringState)
+        {
           if (state.exception != null)
           {
             if (state.exception is EmailAlreadyInUseException)
               await showErrorDialog(context, 'Email Already In Use');
             if (state.exception is WeakPasswordException)
               await showErrorDialog(context, 'Weak Password, Must Be At Least 8 Characters Long');
-            if (state.exception is UnknownException)
-              await showErrorDialog(context, state.exception.toString());
+            if (state.exception is FirebaseAuthException)
+              await showErrorDialog(context, 'Firebase: ${state.exception.toString()}');
           }
+        }
       },
-      builder: (context, state)
-      {
-        return Scaffold
+      child: Scaffold
         (
           appBar: AppBar
           (
@@ -94,8 +95,11 @@ class _RegisterViewState extends State<RegisterView>
               (
                 onPressed: () async
                 {
-                  final event = RegisterEvent(email: emailController.text, password: passwordController.text);
-                  context.read<AuthBloc>().add(event);
+                  context.read<AuthBloc>().add(RegisterEvent
+                  (
+                    email: emailController.text,
+                    password: passwordController.text
+                  ));
                 },
                 child: Text("Register")
               ),
@@ -109,8 +113,7 @@ class _RegisterViewState extends State<RegisterView>
               )
             ],
           )
-        );
-      },
+        )
     );
   }
 }

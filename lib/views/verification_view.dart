@@ -20,15 +20,17 @@ class VerificationView extends StatelessWidget
       ),
       body: Column
       (
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("We've Sen't You A Verification Email, Please Open It To Verify Your Account"),
-
+          Padding(
+            padding: EdgeInsets.fromLTRB(24,24,24,0),
+            child: Text("We've Sen't You A Verification Email, Please Open It To Verify Your Account", textAlign: TextAlign.center),
+          ),
           TextButton(
             onPressed: () async {
               context.read<AuthBloc>().add(SendEmailVerificationEvent());
             }, 
-            child: Text('Resend It')
+            child: Text('Resend It'),
           ),
           
           TextButton (

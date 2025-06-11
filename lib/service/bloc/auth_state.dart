@@ -3,46 +3,45 @@ import 'package:flutter/cupertino.dart';
 
 @immutable
 abstract class AuthState {
-  const AuthState();
+  final bool isLoading;
+  final String loadingText;
+  final Exception? exception;
+  const AuthState({required this.isLoading, this.loadingText = 'Loading', required this.exception});
 }
 
-class UnInitializedState implements AuthState
+class UnInitializedState extends AuthState
 {
-  final bool isLoading;
-
-  UnInitializedState({required this.isLoading});
+  const UnInitializedState({required super.exception, required super.isLoading});
 }
 
 // on the register view
-class RegisteringState implements AuthState
+class RegisteringState extends AuthState
 {
-  final Exception? exception;
-  final bool isLoading;
-  RegisteringState({required this.exception, required this.isLoading});
+  const RegisteringState({required super.exception, required super.isLoading});
 }
 
 // on verification view
-class UnVerifiedState implements AuthState 
+class UnVerifiedState extends AuthState 
 {
-  final Exception? exception;
-  final bool isLoading;
   final String email;
   final String password;
-  const UnVerifiedState({required this.exception, required this.isLoading, required this.email, required this.password});
+  const UnVerifiedState({required super.exception, required super.isLoading, required this.email, required this.password});
 }
 
 // verified and logged in, on notes view
-class LoggedInState implements AuthState 
+class LoggedInState extends AuthState 
 {
-  final Exception? exception;
-  final bool isLoading;
-  const LoggedInState({required this.exception, required this.isLoading});
+  const LoggedInState({required super.exception, required super.isLoading});
 }
 
 // on login view
-class LoggedOutState implements AuthState
+class LoggedOutState extends AuthState
 {
-  final Exception? exception;
-  final bool isLoading;
-  const LoggedOutState({required this.exception, required this.isLoading});
+
+  const LoggedOutState({required super.exception, required super.isLoading});
+
+  @override
+  String toString() {
+    return "LoggedOutState {${exception?.toString() ?? 'null'} ${isLoading.toString()}}";
+  }
 }
