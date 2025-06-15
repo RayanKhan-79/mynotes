@@ -9,6 +9,7 @@ import 'package:mynotes/service/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes_view.dart';
+import 'package:mynotes/views/reset_password_view.dart';
 import 'package:mynotes/views/resgister_view.dart';
 import 'dart:developer' as dev show log;
 
@@ -49,6 +50,9 @@ class _HomeViewState extends State<HomeView>
 
         if (state is UnVerifiedState)
           return VerificationView();
+
+        if (state is ResetPasswordState)
+          return ResetPasswordView();
 
         return CircularProgressIndicator();
       },

@@ -27,8 +27,6 @@ class _LoginViewState extends State<LoginView>
 {
     late TextEditingController emailController;
     late TextEditingController passwordController;
-    // void Function()? _shutDownLoadingScreen;
-
 
     @override
     void initState() 
@@ -57,8 +55,10 @@ class _LoginViewState extends State<LoginView>
             {
               if (state.exception != null) 
               {
-                if (state.exception is LoginException)
-                  await showErrorDialog(context, 'Invalid-Credentials');
+                if (state.exception is WrongCredentialsAuthException)
+                  await showErrorDialog(context, 'Could not find a user with the entered credentials, please confirm that your email and password are correct or that you are a registered user.');
+                if (state.exception is InvalidEmailAuthException)
+                  await showErrorDialog(context, 'Invalid Email');
                 if (state.exception is FirebaseAuthException)
                   await showErrorDialog(context, 'Firebase: ${state.exception.toString()}');
               }
@@ -71,47 +71,76 @@ class _LoginViewState extends State<LoginView>
                 title: Text(widget.title, style: TextStyle(color: Colors.white)),
                 backgroundColor: Colors.blue,
               ),
-              body: Column
+              body: Padding
               (
-                children: 
-                [
-                  TextField
-                  (
-                    controller: emailController,
-                    autocorrect: false, 
-                    enableSuggestions: false,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(hintText: "Email"),
-                  ),
-                  TextField
-                  (
-                    controller: passwordController,
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    decoration: InputDecoration(hintText: "Password")
-                  ),
-                  TextButton
-                  (
-                    onPressed: () async
-                    {
-                      context.read<AuthBloc>().add(LoginEvent
+                padding: const EdgeInsets.all(12.0),
+                child: Column
+                (
+                  spacing: 10,
+                  children: 
+                  [
+                    TextField
+                    (
+                      controller: emailController,
+                      autocorrect: false, 
+                      autofocus: true,
+                      enableSuggestions: false,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(hintText: "Email"),
+                    ),
+                    TextField
+                    (
+                      controller: passwordController,
+                      obscureText: true,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      decoration: InputDecoration(hintText: "Password")
+                    ),
+                    TextButton
+                    (
+                      onPressed: () async
+                      {
+                        context.read<AuthBloc>().add(LoginEvent
+                        (
+                          email: emailController.text,
+                          password: passwordController.text
+                        ));
+                      },
+                      style: TextButton.styleFrom
                       (
-                        email: emailController.text,
-                        password: passwordController.text
-                      ));
-                    },
-                    child: const Text("Login")
-                  ),
-                  TextButton
-                  (
-                    onPressed: ()
-                    {
-                      context.read<AuthBloc>().add(ShouldRegisterEvent());
-                    }, 
-                    child: const Text('Register Here')
-                  )
-                ],
+                        fixedSize: Size(150, 60),
+                        backgroundColor: Colors.amber
+                      ),
+                      child: const Text("Login")
+                    ),
+                    TextButton
+                    (
+                      onPressed: ()
+                      {
+                        context.read<AuthBloc>().add(ShouldRegisterEvent());
+                      }, 
+                      style: TextButton.styleFrom
+                      (
+                        fixedSize: Size(150, 60),
+                        backgroundColor: Colors.amber
+                      ),
+                      child: const Text('Register Here')
+                    ),
+                    TextButton
+                    (
+                      onPressed: ()
+                      {
+                        context.read<AuthBloc>().add(SendResetPasswordEmailEvent(email: null));
+                      }, 
+                      style: TextButton.styleFrom
+                      (
+                        fixedSize: Size(150, 60),
+                        backgroundColor: Colors.amber
+                      ),
+                      child: const Text('Forgot Password')
+                    )
+                  ],
+                ),
               )
           )
         );

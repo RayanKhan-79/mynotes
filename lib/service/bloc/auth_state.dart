@@ -2,11 +2,12 @@
 import 'package:flutter/cupertino.dart';
 
 @immutable
-abstract class AuthState {
+abstract class AuthState 
+{
+  final Exception? exception;
   final bool isLoading;
   final String loadingText;
-  final Exception? exception;
-  const AuthState({required this.isLoading, this.loadingText = 'Loading', required this.exception});
+  const AuthState({required this.exception, this.loadingText = 'Loading', required this.isLoading});
 }
 
 class UnInitializedState extends AuthState
@@ -39,9 +40,10 @@ class LoggedOutState extends AuthState
 {
 
   const LoggedOutState({required super.exception, required super.isLoading});
+}
 
-  @override
-  String toString() {
-    return "LoggedOutState {${exception?.toString() ?? 'null'} ${isLoading.toString()}}";
-  }
+class ResetPasswordState extends AuthState
+{
+  final bool emailSent;
+  const ResetPasswordState({required super.exception, required super.isLoading, required this.emailSent});
 }

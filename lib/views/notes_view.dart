@@ -8,14 +8,26 @@ import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/dialogs.dart';
 import 'package:mynotes/views/notes_list_view.dart';
 
-class NotesView extends StatefulWidget {
+class NotesView extends StatefulWidget 
+{
   const NotesView({super.key});
 
   @override
   State<NotesView> createState() => _NotesViewState();
 }
 
-class _NotesViewState extends State<NotesView> {
+class _NotesViewState extends State<NotesView> 
+{
+  String? selected;
+
+  @override
+  void initState() 
+  {
+    super.initState();
+    FirebaseCloudStorage.instance.initializeListener(
+      userId: AuthService.firebase().currentUser!.userId
+    );
+  }
 
   @override
   Widget build(BuildContext context) 
@@ -49,8 +61,22 @@ class _NotesViewState extends State<NotesView> {
                   }
                   return;
                 case 2:
-                  Navigator.pushNamed(context, '/database/');
-                  return;
+                  final c = searchDialog(context);
+                  c.stream.listen(
+                    (data)
+                    {
+                      FirebaseCloudStorage.instance.searchNotes(
+                        string: data, 
+                        userId: AuthService.firebase().currentUser!.userId
+                      );
+                    },
+                    onDone: () 
+                    {
+                      FirebaseCloudStorage.instance.reCacheNotes(
+                        userId: AuthService.firebase().currentUser!.userId
+                      );
+                    },
+                  );
               }
             },
             itemBuilder: (context) 
@@ -65,8 +91,8 @@ class _NotesViewState extends State<NotesView> {
                 PopupMenuItem
                 (
                   value: 2,
-                  child: Text('execute')
-                )
+                  child: Text('search')
+                ),
               ];
             },
           )
@@ -74,14 +100,13 @@ class _NotesViewState extends State<NotesView> {
       ),
       body: StreamBuilder
       (
-        stream: FirebaseCloudStorage.instance.streamNotes(userId: AuthService.firebase().getUser()!.userId),
+        stream: FirebaseCloudStorage.instance.controller.stream,
         builder: (context, snapshot) 
         {
           switch (snapshot.connectionState)
           {
             case ConnectionState.active:
             case ConnectionState.waiting:
-              // return Text('Notes');
               if (snapshot.hasData)
                 return NotesListView
                 (

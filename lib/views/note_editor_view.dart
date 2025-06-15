@@ -61,7 +61,7 @@ class _NoteEditorViewState extends State<NoteEditorView>
 
     try
     {      
-      _activeNote  = await FirebaseCloudStorage.instance.createNote(userId: AuthService.firebase().getUser()!.userId);    
+      _activeNote  = await FirebaseCloudStorage.instance.createNote(userId: AuthService.firebase().currentUser!.userId);    
     }
     catch (e)
     {

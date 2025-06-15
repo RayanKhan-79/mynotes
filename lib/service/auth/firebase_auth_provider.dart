@@ -14,13 +14,13 @@ class FirebaseAuthProvider implements AuthProvider
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   }
 
-  AuthUser? currentUser;
-
+  
   @override
-  AuthUser? getUser()
+  AuthUser? get currentUser 
   {
-    currentUser = (FirebaseAuth.instance.currentUser != null) ? AuthUser.fromFirebase(FirebaseAuth.instance.currentUser) : null; 
-    return currentUser;
+    return (FirebaseAuth.instance.currentUser != null) ?
+     AuthUser.fromFirebase(FirebaseAuth.instance.currentUser) :
+     null;
   }
 
   @override
@@ -31,7 +31,7 @@ class FirebaseAuthProvider implements AuthProvider
     if (FirebaseAuth.instance.currentUser!.emailVerified == false)
       throw UnVerifiedEmailException();
   
-    return getUser()!;
+    return currentUser!;
   }
 
   @override
@@ -40,14 +40,20 @@ class FirebaseAuthProvider implements AuthProvider
     try 
     {
       await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-      currentUser = getUser();
             
       return currentUser!;
 
     } 
-    on FirebaseAuthException
+    on FirebaseAuthException catch (e)
     {
-      throw LoginException();
+      if (e.code == 'invalid-email')
+        throw InvalidEmailAuthException();
+      
+      if (e.code == 'invalid-credential')
+        throw WrongCredentialsAuthException();
+
+      rethrow;
+      
     }
     
   }
@@ -70,7 +76,6 @@ class FirebaseAuthProvider implements AuthProvider
     try
     {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-      currentUser = getUser();
 
       return currentUser!;
     }
@@ -82,6 +87,9 @@ class FirebaseAuthProvider implements AuthProvider
       if (e.code == 'email-already-in-use')
         throw EmailAlreadyInUseException();
     
+      if (e.code == 'invalid-email')
+        throw InvalidEmailAuthException();
+
       rethrow;
     }
   }
@@ -90,6 +98,23 @@ class FirebaseAuthProvider implements AuthProvider
   Future<void> deleteUser() async
   {
     await FirebaseAuth.instance.currentUser?.delete();
-    currentUser = null;
+  }
+  
+  @override
+  Future<void> sendResetPasswordEmail({required String email}) async
+  {
+    try
+    {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    } 
+    on FirebaseAuthException catch (e)
+    {
+      if (e.code == 'user-not-found')
+        throw UserNotFoundAuthException();
+      if (e.code == 'invalid-email')
+        throw InvalidEmailAuthException();
+      
+      rethrow;
+    }
   }
 }

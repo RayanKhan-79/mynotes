@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 
 Future<T?> showGenericDialogBox<T>({required BuildContext context,required String title,required String content,required Map<String,T?> valueMap})
@@ -95,13 +97,6 @@ void Function() showLoadingDialog(BuildContext context)
   (
     title: Text("Loading Please Wait"),
     content: CircularProgressIndicator(),
-    // actions: [
-    //   TextButton
-    //   (
-    //     onPressed: () => Navigator.pop(context), 
-    //     child: Text("Cancel")
-    //   )
-    // ],
   );
 
   showDialog
@@ -112,4 +107,84 @@ void Function() showLoadingDialog(BuildContext context)
   );
 
   return () => Navigator.pop(context);
+}
+
+StreamController<String> searchDialog(BuildContext context)
+{
+  final scontroller = StreamController<String>(); 
+  final controller = TextEditingController();
+  late OverlayEntry entry;
+  entry = OverlayEntry(
+    builder: (context) {
+      return Positioned
+      (
+        right: 10,
+        bottom: 30,
+        child: Container
+        (
+          constraints: BoxConstraints(
+            minHeight: 100,
+            maxWidth: 200,
+          ),
+          child: Material(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.lightBlue,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column
+              (
+                children:
+                [
+                  TextField
+                  (
+                    controller: controller,
+                    autofocus: true,
+                    autocorrect: false,
+                    decoration: InputDecoration(hintText: 'Enter text here', contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0)),
+                  ),
+                  Row
+                  (
+                    spacing: 10,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: 
+                    [
+                      TextButton
+                      (
+                        onPressed: () 
+                        {
+                          dev.log(controller.text);
+                          scontroller.add(controller.text);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.amber
+                        ),
+                        child: Text('Search')
+                      ),
+                      TextButton
+                      (
+                        onPressed: () 
+                        {
+                          scontroller.close();
+                          entry.remove();
+                          controller.dispose();
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.amber
+                        ),
+                        child: Text('Cancel')
+                      )
+                    ],
+                  )
+                ]
+              ),
+            ),
+          )
+        )
+      );
+  });
+
+  Overlay.of(context).insert(entry);
+
+  return scontroller;
 }

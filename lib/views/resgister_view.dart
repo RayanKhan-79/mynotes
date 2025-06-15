@@ -71,47 +71,63 @@ class _RegisterViewState extends State<RegisterView>
             title: Text(widget.title, style: TextStyle(color: Colors.white)), 
             backgroundColor: Colors.blue,
           ),
-          body: Column
+          body: Padding
           (
-            children: 
-            [
-              TextField
-              (
-                controller: emailController,
-                autocorrect: false, 
-                enableSuggestions: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(hintText: "Email"),
-              ),
-              TextField
-              (
-                controller: passwordController,
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
-                decoration: InputDecoration(hintText: "Password")
-              ),
-              TextButton
-              (
-                onPressed: () async
-                {
-                  context.read<AuthBloc>().add(RegisterEvent
+            padding: const EdgeInsets.all(12.0),
+            child: Column
+            (
+              spacing: 10,
+              children: 
+              [
+                TextField
+                (
+                  controller: emailController,
+                  autocorrect: false, 
+                  autofocus: true,
+                  enableSuggestions: false,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(hintText: "Email"),
+                ),
+                TextField
+                (
+                  controller: passwordController,
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: InputDecoration(hintText: "Password")
+                ),
+                TextButton
+                (
+                  onPressed: () async
+                  {
+                    context.read<AuthBloc>().add(RegisterEvent
+                    (
+                      email: emailController.text,
+                      password: passwordController.text
+                    ));
+                  },
+                  style: TextButton.styleFrom
                   (
-                    email: emailController.text,
-                    password: passwordController.text
-                  ));
-                },
-                child: Text("Register")
-              ),
-              TextButton
-              (
-                onPressed: ()
-                {
-                  context.read<AuthBloc>().add(LogoutEvent());
-                }, 
-                child: const Text('Already Registered? Login Here')
-              )
-            ],
+                    fixedSize: Size(150, 60),
+                    backgroundColor: Colors.amber
+                  ),
+                  child: Text("Register")
+                ),
+                TextButton
+                (
+                  onPressed: ()
+                  {
+                    context.read<AuthBloc>().add(LogoutEvent());
+                  }, 
+                  style: TextButton.styleFrom
+                  (
+                    fixedSize: Size(150, 60),
+                    backgroundColor: Colors.amber
+                  ),
+                  child: const Text('Already Registered? Login Here', textAlign: TextAlign.center, textScaler: TextScaler.linear(0.9))
+                )
+              ],
+            ),
           )
         )
     );

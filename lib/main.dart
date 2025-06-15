@@ -8,7 +8,6 @@ import 'package:mynotes/service/auth/firebase_auth_provider.dart';
 import 'package:mynotes/service/bloc/auth_bloc.dart';
 import 'package:mynotes/service/crud/notes_service.dart';
 import 'package:mynotes/views/note_editor_view.dart';
-import 'package:mynotes/views/database_view.dart';
 import 'package:mynotes/views/notes_view.dart';
 import 'package:mynotes/views/verification_view.dart';
 import 'views/resgister_view.dart';
@@ -49,7 +48,6 @@ class App extends StatelessWidget
               '/verification/' : (context) => VerificationView(),
               '/notes_view/' : (context) => NotesView(),
               '/add_note/' : (context) => NoteEditorView(),
-              '/database/' : (context) => DatabaseView(),
             },
         );
     }

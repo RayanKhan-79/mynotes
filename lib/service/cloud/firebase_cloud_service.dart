@@ -1,15 +1,66 @@
+import 'dart:async';
 import 'dart:developer' as dev show log;
 
 import 'package:mynotes/service/cloud/cloud_exceptions.dart';
 import 'package:mynotes/service/cloud/cloud_note.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mynotes/service/cloud/database_constants.dart';
+import 'package:mynotes/utilities/string_search.dart';
 
 class FirebaseCloudStorage 
 {
-  FirebaseCloudStorage._singletonConstructor();
+  FirebaseCloudStorage._singletonConstructor() : 
+    controller = StreamController<Iterable<CloudNote>>();
+
   static final FirebaseCloudStorage _instance = FirebaseCloudStorage._singletonConstructor();
   static FirebaseCloudStorage get instance => _instance;
+
+  StreamController<Iterable<CloudNote>> controller;
+
+  void initializeListener({required String userId})
+  {
+      FirebaseFirestore.instance
+      .collection(TABLES.NOTES)
+      .snapshots()
+      .listen((data) 
+      {
+        controller.add 
+        (
+          data.docs
+            .map((elem) => CloudNote.fromQuerySnapshot(elem))
+            .where((elem) => elem.userId == userId)
+        );
+      });
+  }  
+
+  Future<void> reCacheNotes({required String userId}) async
+  {
+    await for (var elem in streamNotes(userId: userId))
+    {
+      controller.add(elem);
+    }
+  }
+
+  Future<void> searchNotes({required String string, required String userId}) async
+  {
+    try 
+    {
+      final querySnapshot = await FirebaseFirestore.instance.collection(TABLES.NOTES).get();
+      List<CloudNote> results = [];
+      for (final doc in querySnapshot.docs.where((doc) => doc.data()[COLUMNS.USER_ID] == userId))
+      {
+        if (stringSearch(doc.data()[COLUMNS.TEXT], string))
+          results.add(CloudNote.fromQuerySnapshot(doc));
+      }
+    
+      controller.add(results);
+    } 
+    catch (e) 
+    {
+      dev.log(e.toString());
+      throw CloudReadNoteException();  
+    }
+  }
 
   Future<void> deleteNote({required String noteId}) async
   {

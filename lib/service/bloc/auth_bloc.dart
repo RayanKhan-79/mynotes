@@ -14,6 +14,49 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
   AuthBloc({required this.provider}) : super(UnInitializedState(exception: null, isLoading: false))
   {
 
+    on<SendResetPasswordEmailEvent>((event, emit) async
+    {
+      try
+      {
+        if (event.email == null)
+        {
+          emit(ResetPasswordState
+          (
+            exception: null,
+            isLoading: false,
+            emailSent: false
+          ));
+        }
+        else
+        {
+          emit(ResetPasswordState
+          (
+            exception: null,
+            isLoading: true,
+            emailSent: false
+          ));
+
+          await provider.sendResetPasswordEmail(email: event.email!);
+
+          emit(ResetPasswordState
+          (
+            exception: null,
+            isLoading: false,
+            emailSent: true
+          ));
+        }
+      }
+      on Exception catch (e)
+      {
+        emit(ResetPasswordState
+        (
+          exception: e,
+          isLoading: false,
+          emailSent: false
+        ));
+      }
+    });
+
     on<ShouldRegisterEvent>((event, emit)
     {
       emit(RegisteringState
@@ -93,14 +136,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
         emit(UnInitializedState(exception: null, isLoading: false));
 
         await provider.initialize();
-        if (provider.getUser() == null)
+        if (provider.currentUser == null)
           emit(LoggedOutState
           (
             exception: null,
             isLoading: false
           ));
 
-        else if (provider.getUser()!.verified == false)
+        else if (provider.currentUser!.verified == false)
           emit(LoggedOutState
           (
             exception: null,
@@ -142,13 +185,65 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
     {
       try 
       {
-        emit(LoggedInState(exception: null, isLoading: true));
+        if (state is LoggedInState)
+        {
+          emit(LoggedInState
+          (
+            exception: null,
+            isLoading: true
+          ));
+        }
+        else if (state is RegisteringState)
+        {
+          emit(RegisteringState
+          (
+            exception: null,
+            isLoading: true
+          ));
+        }
+        else if (state is ResetPasswordState)
+        {
+          emit(ResetPasswordState
+          (
+            exception: null,
+            isLoading: true,
+            emailSent: false,
+          ));
+        }
         await provider.logout();
-        emit(LoggedOutState(exception: null, isLoading: false));
+        emit(LoggedOutState
+        (
+          exception: null,
+          isLoading: false
+        ));
       } 
       on Exception catch (e) 
       {
-        emit(LoggedInState(exception: e, isLoading: false));
+        if (state is LoggedInState)
+        {
+          emit(LoggedInState
+          (
+            exception: e,
+            isLoading: false
+          ));
+        }
+        else if (state is RegisteringState)
+        {
+          emit(RegisteringState
+          (
+            exception: e,
+            isLoading: false
+          ));
+        }
+        else if (state is ResetPasswordState)
+        {
+          emit(ResetPasswordState
+          (
+            exception: e,
+            isLoading: false,
+            emailSent: false,
+          ));
+        }
       }
       
     });
@@ -191,14 +286,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
   }
 
   @override
-  void onChange(Change<AuthState> change) {
-    super.onChange(change);
-
-    dev.log(change.toString());
-  }
-
-  @override
-  void onTransition(Transition<AuthEvent, AuthState> transition) {
+  void onTransition(Transition<AuthEvent, AuthState> transition) 
+  {
     super.onTransition(transition);
     dev.log(transition.toString());
   }

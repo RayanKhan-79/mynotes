@@ -41,3 +41,9 @@ class ShouldRegisterEvent implements AuthEvent
 {
   const ShouldRegisterEvent();
 }
+
+class SendResetPasswordEmailEvent implements AuthEvent
+{
+  final String? email;
+  const SendResetPasswordEmailEvent({required this.email});
+}

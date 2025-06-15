@@ -24,7 +24,7 @@ class VerificationView extends StatelessWidget
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(24,24,24,0),
-            child: Text("We've Sen't You A Verification Email, Please Open It To Verify Your Account", textAlign: TextAlign.center),
+            child: Text("We've sent you a verification email, please open your inbox and complete the verification process", textAlign: TextAlign.center),
           ),
           TextButton(
             onPressed: () async {
