@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mynotes/service/bloc/auth_bloc.dart';
-import 'package:mynotes/service/bloc/auth_event.dart';
-import 'package:mynotes/service/bloc/auth_state.dart';
+import 'package:mynotes/service/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/service/auth/bloc/auth_event.dart';
+import 'package:mynotes/service/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs.dart';
 
 class ResetPasswordView extends StatefulWidget {

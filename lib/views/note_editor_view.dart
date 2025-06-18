@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:mynotes/service/auth/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/service/cloud/bloc/cloud_bloc.dart';
+import 'package:mynotes/service/cloud/bloc/cloud_events.dart';
+import 'package:mynotes/service/cloud/bloc/cloud_state.dart';
 import 'package:mynotes/service/cloud/cloud_note.dart';
-import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/dialogs.dart';
-import 'dart:developer' as dev show log;
 
-import 'package:share_plus/share_plus.dart';
 
 class NoteEditorView extends StatefulWidget 
 {
-  const NoteEditorView({super.key});
+  final CloudNote _activeNote;
+  const NoteEditorView(this._activeNote, {super.key});
 
   @override
   State<NoteEditorView> createState() => _NoteEditorViewState();
@@ -18,7 +19,6 @@ class NoteEditorView extends StatefulWidget
 class _NoteEditorViewState extends State<NoteEditorView> 
 {
 
-  CloudNote? _activeNote;
   late final TextEditingController _textController;
 
   @override
@@ -27,101 +27,119 @@ class _NoteEditorViewState extends State<NoteEditorView>
     super.initState();
     _textController = TextEditingController();
     _textController.addListener(() async
-    {      
-      await FirebaseCloudStorage.instance.updateNote(noteId: _activeNote!.id, text: _textController.text);
-      _activeNote = await FirebaseCloudStorage.instance.readNote(noteId: _activeNote!.id);
+    {    
+      context.read<CloudBloc>().add(UpdateNoteEvent(note: widget._activeNote, updatedText: _textController.text));
     });
+    _textController.text = widget._activeNote.text;
   }
 
   @override
   void dispose() 
   {
     _textController.dispose();
-    _autoDeleteNote();
     super.dispose();
-  }
-
-  void _autoDeleteNote() async
-  {
-    if (_activeNote != null && _activeNote!.text.isEmpty)
-    {
-      await FirebaseCloudStorage.instance.deleteNote(noteId: _activeNote!.id);
-    }
-  }
-
-  Future<void> createNote() async
-  {
-    _activeNote = getBuildContextArgument<CloudNote>(context);
-
-    if (_activeNote != null) 
-    {
-      _textController.text = _activeNote!.text;
-      return;
-    }
-
-    try
-    {      
-      _activeNote  = await FirebaseCloudStorage.instance.createNote(userId: AuthService.firebase().currentUser!.userId);    
-    }
-    catch (e)
-    {
-      dev.log(e.toString());
-      showErrorDialog(context, e.toString());
-      rethrow;
-    }
-
   }
 
   @override
   Widget build(BuildContext context) 
   {
-    return FutureBuilder
+    return BlocListener<CloudBloc, CloudState>
     (
-      future: createNote(),
-      builder: (context, snapshot) 
+      listener: (context, state) async 
       {
-        switch (snapshot.connectionState)
-        {
-          case ConnectionState.done:
-            return Scaffold(
-              appBar: AppBar
-              (
-                title: const Text("Notes View", style: TextStyle(color: Colors.white),),
-                backgroundColor: Colors.blue,
-                actions: 
-                [
-                  IconButton
-                  (
-                    onPressed: () async 
-                    {
-                      if (_activeNote != null)
-                        if (_activeNote!.text.isNotEmpty)
-                        {
-                          var param = ShareParams(text: _activeNote!.text);
-                          SharePlus.instance.share(param);
-                          return;
-                        }
-
-                      await showErrorDialog(context, 'Cannot Share Empty Note');
-
-                    },
-                    icon: Icon(Icons.share)
-                  )
-                ],
-              ),
-              body: TextField(
-                maxLines: null, 
-                controller: _textController,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(12),
-                  hintText: 'Start Typing here'
-                ),
-              )
-            );
-          default:
-            return Center(child: CircularProgressIndicator());
-        }
-      } 
+        if (state is NoteEditorState)
+          if (state.exception != null)
+            await showErrorDialog(context, state.exception.toString());
+      },
+      child: Scaffold
+      (
+        appBar: AppBar
+        (
+          title: const Text("Notes View", style: TextStyle(color: Colors.white),),
+          backgroundColor: Colors.blue,
+          actions: 
+          [
+            IconButton
+            (
+              onPressed: () async 
+              {
+                context.read<CloudBloc>().add(ShareNoteEvent(note: widget._activeNote));
+              },
+              icon: Icon(Icons.share)
+            ),
+            IconButton
+            (
+              onPressed: () async
+              {
+                context.read<CloudBloc>().add(LeaveEditorEvent(note: widget._activeNote));
+              },
+              icon: Icon(Icons.arrow_back)
+            )
+          ],
+        ),
+        body: TextField
+        (
+          maxLines: null, 
+          controller: _textController,
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.all(12),
+            hintText: 'Start Typing here'
+          ),
+        )
+      )
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) 
+  // {
+  //   return FutureBuilder
+  //   (
+  //     future: createNote(),
+  //     builder: (context, snapshot) 
+  //     {
+  //       switch (snapshot.connectionState)
+  //       {
+  //         case ConnectionState.done:
+  //           return Scaffold(
+  //             appBar: AppBar
+  //             (
+  //               title: const Text("Notes View", style: TextStyle(color: Colors.white),),
+  //               backgroundColor: Colors.blue,
+  //               actions: 
+  //               [
+  //                 IconButton
+  //                 (
+  //                   onPressed: () async 
+  //                   {
+  //                     if (_activeNote != null)
+  //                       if (_activeNote!.text.isNotEmpty)
+  //                       {
+  //                         var param = ShareParams(text: _activeNote!.text);
+  //                         SharePlus.instance.share(param);
+  //                         return;
+  //                       }
+
+  //                     await showErrorDialog(context, 'Cannot Share Empty Note');
+
+  //                   },
+  //                   icon: Icon(Icons.share)
+  //                 )
+  //               ],
+  //             ),
+  //             body: TextField(
+  //               maxLines: null, 
+  //               controller: _textController,
+  //               decoration: InputDecoration(
+  //                 contentPadding: EdgeInsets.all(12),
+  //                 hintText: 'Start Typing here'
+  //               ),
+  //             )
+  //           );
+  //         default:
+  //           return Center(child: CircularProgressIndicator());
+  //       }
+  //     } 
+  //   );
+  // }
 }

@@ -3,8 +3,8 @@ import 'dart:developer' as dev;
 
 import 'package:bloc/bloc.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
-import 'package:mynotes/service/bloc/auth_event.dart';
-import 'package:mynotes/service/bloc/auth_state.dart';
+import 'package:mynotes/service/auth/bloc/auth_event.dart';
+import 'package:mynotes/service/auth/bloc/auth_state.dart';
 
 
 class AuthBloc extends Bloc<AuthEvent, AuthState>
@@ -134,6 +134,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
     on<InitializeEvent>((event, emit) async 
     {
         emit(UnInitializedState(exception: null, isLoading: false));
+
+        dev.log('BINGO');
 
         await provider.initialize();
         if (provider.currentUser == null)
@@ -289,6 +291,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
   void onTransition(Transition<AuthEvent, AuthState> transition) 
   {
     super.onTransition(transition);
-    dev.log(transition.toString());
+    
+    dev.log('Auth => ${transition.toString()}');
   }
 }

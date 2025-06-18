@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/service/auth/auth_service.dart';
 import 'package:mynotes/service/auth/firebase_auth_provider.dart';
-import 'package:mynotes/service/bloc/auth_bloc.dart';
+import 'package:mynotes/service/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/service/cloud/bloc/cloud_bloc.dart';
 import 'package:mynotes/service/crud/notes_service.dart';
 import 'package:mynotes/views/note_editor_view.dart';
 import 'package:mynotes/views/notes_view.dart';
@@ -25,7 +26,6 @@ class App extends StatelessWidget
 {
     const App({super.key});
 
-    // This widget is the root of your application.
     @override
     Widget build(BuildContext context) 
     {
@@ -36,18 +36,26 @@ class App extends StatelessWidget
             (
                 primarySwatch: Colors.blue
             ),
-            home: BlocProvider
+            home: MultiBlocProvider
             (
-              create:(context) => AuthBloc(provider: AuthService.firebase()),
+              providers: 
+              [
+                BlocProvider(
+                  create: (context) => AuthBloc(provider: AuthService.firebase())
+                ),
+                BlocProvider(
+                  create: (context) => CloudBloc()
+                ),
+              ],
               child: HomeView(),
             ),
             routes: 
             {
-              '/login/' : (context) => LoginView(),
-              '/register/' : (context) => RegisterView(),
-              '/verification/' : (context) => VerificationView(),
-              '/notes_view/' : (context) => NotesView(),
-              '/add_note/' : (context) => NoteEditorView(),
+              // '/login/' : (context) => LoginView(),
+              // '/register/' : (context) => RegisterView(),
+              // '/verification/' : (context) => VerificationView(),
+              // '/notes_view/' : (context) => NotesView(),
+              // '/add_note/' : (context) => NoteEditorView(),
             },
         );
     }

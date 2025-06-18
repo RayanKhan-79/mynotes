@@ -1,11 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mynotes/service/auth/auth_service.dart';
-import 'package:mynotes/service/bloc/auth_bloc.dart';
-import 'package:mynotes/service/bloc/auth_event.dart';
+import 'package:mynotes/helpers/loading/loading_dialog.dart';
+import 'package:mynotes/helpers/searching/search_dialog.dart';
+import 'package:mynotes/service/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/service/auth/bloc/auth_event.dart' hide InitializeEvent;
+import 'package:mynotes/service/cloud/bloc/cloud_bloc.dart';
+import 'package:mynotes/service/cloud/bloc/cloud_events.dart';
+import 'package:mynotes/service/cloud/bloc/cloud_state.dart';
 import 'package:mynotes/service/cloud/firebase_cloud_service.dart';
 import 'package:mynotes/utilities/dialogs.dart';
+import 'package:mynotes/views/note_editor_view.dart';
 import 'package:mynotes/views/notes_list_view.dart';
 
 class NotesView extends StatefulWidget 
@@ -18,19 +22,37 @@ class NotesView extends StatefulWidget
 
 class _NotesViewState extends State<NotesView> 
 {
-  String? selected;
-
-  @override
-  void initState() 
-  {
-    super.initState();
-    FirebaseCloudStorage.instance.initializeListener(
-      userId: AuthService.firebase().currentUser!.userId
-    );
-  }
-
+ 
   @override
   Widget build(BuildContext context) 
+  {
+    context.read<CloudBloc>().add(InitializeEvent());
+    
+    return BlocConsumer<CloudBloc, CloudState>(
+      listener: (context, state) 
+      {
+        if (state.isLoading)
+          LoadingDialog.instance.show(context, state.loadingText);
+        else
+          LoadingDialog.instance.hide();
+
+        if (state is NotesListViewState)
+          if (state.isSearching)
+            SearchDialog.instance.showDialog(context, context.read<CloudBloc>());
+      },
+      builder: (context, state) {
+        if (state is NotesListViewState)
+          return buildInterface(context);
+        if (state is NoteEditorState)
+          return NoteEditorView(state.note);
+        
+        return Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+    );
+  }
+  
+
+  Widget buildInterface(BuildContext context)
   {
     return Scaffold
     (
@@ -44,7 +66,7 @@ class _NotesViewState extends State<NotesView>
           (
             onPressed: () async
             {
-              Navigator.pushNamed(context, '/add_note/');
+              context.read<CloudBloc>().add(AddNoteEvent());
             }, 
             icon: Icon(Icons.add)
           ),
@@ -56,27 +78,12 @@ class _NotesViewState extends State<NotesView>
               {
                 case 1:
                   if ((await showLogoutDialog(context)) == true)
-                  {
                     context.read<AuthBloc>().add(LogoutEvent());
-                  }
                   return;
+
                 case 2:
-                  final c = searchDialog(context);
-                  c.stream.listen(
-                    (data)
-                    {
-                      FirebaseCloudStorage.instance.searchNotes(
-                        string: data, 
-                        userId: AuthService.firebase().currentUser!.userId
-                      );
-                    },
-                    onDone: () 
-                    {
-                      FirebaseCloudStorage.instance.reCacheNotes(
-                        userId: AuthService.firebase().currentUser!.userId
-                      );
-                    },
-                  );
+                  context.read<CloudBloc>().add(SearchNoteEvent());
+                  return;
               }
             },
             itemBuilder: (context) 
@@ -117,11 +124,15 @@ class _NotesViewState extends State<NotesView>
                   },
                   openNoteCallback: (note)
                   {
-                    Navigator.pushNamed(context, '/add_note/', arguments: note);
+                    // Navigator.pushNamed(context, '/add_note/', arguments: note);
+                    context.read<CloudBloc>().add(OpenNoteEvent(noteId: note.id));
+
                   },
                 );
               else
-                return Text("Couldn't Fetch Your Notes");
+                return Center(
+                  child: Text("Couldn't Fetch Your Notes")
+                );
 
             default:
               return Column

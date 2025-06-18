@@ -2,7 +2,7 @@ bool stringSearch(String target, String search)
 {
   target = target.toLowerCase();
   search = search.toLowerCase();
-  int len = target.length - search.length;
+  int len = target.length - search.length + 1;
 
   for (int j = 0; j < len; j += 1)
   {
