@@ -28,7 +28,13 @@ class _NoteEditorViewState extends State<NoteEditorView>
     _textController = TextEditingController();
     _textController.addListener(() async
     {    
-      context.read<CloudBloc>().add(UpdateNoteEvent(note: widget._activeNote, updatedText: _textController.text));
+      context
+        .read<CloudBloc>()
+        .add(UpdateNoteEvent
+        (
+          note: widget._activeNote,
+          updatedText: _textController.text
+        ));
     });
     _textController.text = widget._activeNote.text;
   }
@@ -89,57 +95,4 @@ class _NoteEditorViewState extends State<NoteEditorView>
       )
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) 
-  // {
-  //   return FutureBuilder
-  //   (
-  //     future: createNote(),
-  //     builder: (context, snapshot) 
-  //     {
-  //       switch (snapshot.connectionState)
-  //       {
-  //         case ConnectionState.done:
-  //           return Scaffold(
-  //             appBar: AppBar
-  //             (
-  //               title: const Text("Notes View", style: TextStyle(color: Colors.white),),
-  //               backgroundColor: Colors.blue,
-  //               actions: 
-  //               [
-  //                 IconButton
-  //                 (
-  //                   onPressed: () async 
-  //                   {
-  //                     if (_activeNote != null)
-  //                       if (_activeNote!.text.isNotEmpty)
-  //                       {
-  //                         var param = ShareParams(text: _activeNote!.text);
-  //                         SharePlus.instance.share(param);
-  //                         return;
-  //                       }
-
-  //                     await showErrorDialog(context, 'Cannot Share Empty Note');
-
-  //                   },
-  //                   icon: Icon(Icons.share)
-  //                 )
-  //               ],
-  //             ),
-  //             body: TextField(
-  //               maxLines: null, 
-  //               controller: _textController,
-  //               decoration: InputDecoration(
-  //                 contentPadding: EdgeInsets.all(12),
-  //                 hintText: 'Start Typing here'
-  //               ),
-  //             )
-  //           );
-  //         default:
-  //           return Center(child: CircularProgressIndicator());
-  //       }
-  //     } 
-  //   );
-  // }
 }

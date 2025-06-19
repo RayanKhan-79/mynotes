@@ -9,7 +9,7 @@ import 'package:mynotes/service/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/service/cloud/bloc/cloud_bloc.dart';
 import 'package:mynotes/service/crud/notes_service.dart';
 import 'package:mynotes/views/note_editor_view.dart';
-import 'package:mynotes/views/notes_view.dart';
+import 'package:mynotes/views/notes_home_view.dart';
 import 'package:mynotes/views/verification_view.dart';
 import 'views/resgister_view.dart';
 import 'views/login_view.dart';
@@ -32,6 +32,7 @@ class App extends StatelessWidget
         return MaterialApp
         (
             title: 'Flutter Demo',
+            debugShowCheckedModeBanner: false,
             theme: ThemeData
             (
                 primarySwatch: Colors.blue
@@ -49,14 +50,6 @@ class App extends StatelessWidget
               ],
               child: HomeView(),
             ),
-            routes: 
-            {
-              // '/login/' : (context) => LoginView(),
-              // '/register/' : (context) => RegisterView(),
-              // '/verification/' : (context) => VerificationView(),
-              // '/notes_view/' : (context) => NotesView(),
-              // '/add_note/' : (context) => NoteEditorView(),
-            },
         );
     }
 }

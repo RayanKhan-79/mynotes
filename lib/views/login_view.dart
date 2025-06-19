@@ -74,72 +74,74 @@ class _LoginViewState extends State<LoginView>
               body: Padding
               (
                 padding: const EdgeInsets.all(12.0),
-                child: Column
-                (
-                  spacing: 10,
-                  children: 
-                  [
-                    TextField
-                    (
-                      controller: emailController,
-                      autocorrect: false, 
-                      autofocus: true,
-                      enableSuggestions: false,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(hintText: "Email"),
-                    ),
-                    TextField
-                    (
-                      controller: passwordController,
-                      obscureText: true,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: InputDecoration(hintText: "Password")
-                    ),
-                    TextButton
-                    (
-                      onPressed: () async
-                      {
-                        context.read<AuthBloc>().add(LoginEvent
+                child: SingleChildScrollView(
+                  child: Column
+                  (
+                    spacing: 10,
+                    children: 
+                    [
+                      TextField
+                      (
+                        controller: emailController,
+                        autocorrect: false, 
+                        autofocus: true,
+                        enableSuggestions: false,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(hintText: "Email"),
+                      ),
+                      TextField
+                      (
+                        controller: passwordController,
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        decoration: InputDecoration(hintText: "Password")
+                      ),
+                      TextButton
+                      (
+                        onPressed: () async
+                        {
+                          context.read<AuthBloc>().add(LoginEvent
+                          (
+                            email: emailController.text,
+                            password: passwordController.text
+                          ));
+                        },
+                        style: TextButton.styleFrom
                         (
-                          email: emailController.text,
-                          password: passwordController.text
-                        ));
-                      },
-                      style: TextButton.styleFrom
-                      (
-                        fixedSize: Size(150, 60),
-                        backgroundColor: Colors.amber
+                          fixedSize: Size(150, 60),
+                          backgroundColor: Colors.amber
+                        ),
+                        child: const Text("Login")
                       ),
-                      child: const Text("Login")
-                    ),
-                    TextButton
-                    (
-                      onPressed: ()
-                      {
-                        context.read<AuthBloc>().add(ShouldRegisterEvent());
-                      }, 
-                      style: TextButton.styleFrom
+                      TextButton
                       (
-                        fixedSize: Size(150, 60),
-                        backgroundColor: Colors.amber
+                        onPressed: ()
+                        {
+                          context.read<AuthBloc>().add(ShouldRegisterEvent());
+                        }, 
+                        style: TextButton.styleFrom
+                        (
+                          fixedSize: Size(150, 60),
+                          backgroundColor: Colors.amber
+                        ),
+                        child: const Text('Register Here')
                       ),
-                      child: const Text('Register Here')
-                    ),
-                    TextButton
-                    (
-                      onPressed: ()
-                      {
-                        context.read<AuthBloc>().add(SendResetPasswordEmailEvent(email: null));
-                      }, 
-                      style: TextButton.styleFrom
+                      TextButton
                       (
-                        fixedSize: Size(150, 60),
-                        backgroundColor: Colors.amber
-                      ),
-                      child: const Text('Forgot Password')
-                    )
-                  ],
+                        onPressed: ()
+                        {
+                          context.read<AuthBloc>().add(SendResetPasswordEmailEvent(email: null));
+                        }, 
+                        style: TextButton.styleFrom
+                        (
+                          fixedSize: Size(150, 60),
+                          backgroundColor: Colors.amber
+                        ),
+                        child: const Text('Forgot Password')
+                      )
+                    ],
+                  ),
                 ),
               )
           )

@@ -8,7 +8,7 @@ import 'package:mynotes/service/auth/bloc/auth_event.dart';
 import 'package:mynotes/service/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs.dart';
 import 'package:mynotes/views/login_view.dart';
-import 'package:mynotes/views/notes_view.dart';
+import 'package:mynotes/views/notes_home_view.dart';
 import 'package:mynotes/views/reset_password_view.dart';
 import 'package:mynotes/views/resgister_view.dart';
 import 'dart:developer' as dev show log;
@@ -40,7 +40,7 @@ class _HomeViewState extends State<HomeView>
       builder: (context, state) 
       {
         if (state is LoggedInState)
-          return NotesView();
+          return NotesHomeView();
         
         if (state is LoggedOutState)
           return LoginView();

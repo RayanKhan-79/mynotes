@@ -10,7 +10,6 @@ class SearchDialog
 
   final StreamController<String> searchWords;
   late void Function() _dismisserFunction;
-  void Function()? onDissmiss;
 
   SearchDialog._singletonConstructor() : searchWords = StreamController<String>.broadcast();
   static final SearchDialog _instance = SearchDialog._singletonConstructor();
@@ -25,9 +24,6 @@ class SearchDialog
 
   void showDialog(BuildContext context, CloudBloc bloc)
   {
-    if (onDissmiss == null)
-      throw Exception();
-
     final controller = TextEditingController();
     late OverlayEntry entry;
 
@@ -92,7 +88,10 @@ class SearchDialog
                         ),
                         TextButton
                         (
-                          onPressed: () => bloc.add(ClearSearchEvent()),
+                          onPressed: () 
+                          {
+                            bloc.add(ClearSearchEvent());
+                          },
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.amber
                           ),

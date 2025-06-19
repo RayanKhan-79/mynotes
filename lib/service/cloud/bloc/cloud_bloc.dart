@@ -68,21 +68,6 @@ class CloudBloc extends Bloc<CloudEvent, CloudState>
           ),
         );
 
-        SearchDialog.instance.onDissmiss = () 
-        {
-          add(ClearSearchEvent());
-          // SearchDialog.instance.dissmissDialog();
-          // FirebaseCloudStorage.instance.cacheNotes(
-          //     userId: AuthService.firebase().currentUser!.userId
-          // );
-          // emit(NotesListViewState
-          // (
-          //   isSearching: false,
-          //   exception: null,
-          //   isLoading: false
-          // ));
-        };
-
         emit(NotesListViewState
         (
           isSearching: true,
