@@ -25,13 +25,12 @@ class FirebaseCloudStorage
   {
       FirebaseFirestore.instance
       .collection(TABLES.NOTES)
+      .where(COLUMNS.USER_ID, isEqualTo: userId)
       .snapshots()
       .listen((data)
       {
         _cache = data.docs.map(
           (elem) => CloudNote.fromQuerySnapshot(elem)
-        ).where(
-          (elem) => elem.userId == userId
         );
 
         controller.add(_cache);
@@ -47,9 +46,13 @@ class FirebaseCloudStorage
   {
     try
     {
-      final querySnapshot = await FirebaseFirestore.instance.collection(TABLES.NOTES).get();
+      final querySnapshot = await FirebaseFirestore.instance
+        .collection(TABLES.NOTES)
+        .where(COLUMNS.USER_ID, isEqualTo: userId)
+        .get();
+
       List<CloudNote> results = [];
-      for (final doc in querySnapshot.docs.where((doc) => doc.data()[COLUMNS.USER_ID] == userId))
+      for (final doc in querySnapshot.docs)
       {
         if (stringSearch(doc.data()[COLUMNS.TEXT], string))
           results.add(CloudNote.fromQuerySnapshot(doc));
@@ -95,19 +98,6 @@ class FirebaseCloudStorage
       throw CloudUpdateNoteException();
     }
   }
-
-  // Stream<Iterable<CloudNote>> streamNotes({required String userId})
-  // {
-  //   return FirebaseFirestore.instance
-  //     .collection(TABLES.NOTES)
-  //     .snapshots()
-  //     .map((snapshot) => snapshot.docs
-  //       .map((documentSnapshot) => CloudNote
-  //         .fromQuerySnapshot(documentSnapshot)
-  //       )
-  //       .where((note) => note.userId == userId)
-  //     );
-  // }
 
   Future<CloudNote> readNote({required String noteId}) async
   {
